@@ -3,7 +3,6 @@ import techmanpy
 import keyboard
 from time import sleep
 
-
 async def move():
    async with techmanpy.connect_sct(robot_ip='192.168.0.41') as conn:
       x = -500
@@ -35,8 +34,6 @@ async def move():
             print("right")
 
          await conn.move_to_point_ptp([x, y, z, 178, -0.2, -90], 1, 150)
-
-
 
 
 asyncio.run(move())
