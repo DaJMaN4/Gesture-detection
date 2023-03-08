@@ -1,41 +1,99 @@
 import numpy as np
-import cv2 as cv
+import cv2
 from matplotlib import pyplot as plt
-MIN_MATCH_COUNT = 10
-img1 = cv.imread('test pictures/hand.jpg',0)
+import os
+import sys
+import time
+from uarm.wrapper import SwiftAPI
+from uarm.utils.log import logger
+import keyboard
+import mediapipe as mp
+import imutils
+from time import sleep
 
-cap = cv.VideoCapture(0)
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+
+MIN_MATCH_COUNT = 10
+
+
+logger.setLevel(logger.VERBOSE)
+
+swift = SwiftAPI(filters={'hwid': 'USB VID:PID=2341:0042'}, callback_thread_pool_size=1)
+swift.waiting_ready()
+
+device_info = swift.get_device_info()
+print(device_info)
+
+time.sleep(5)
+print(swift.get_polar())
+
+swift.set_speed_factor(factor=1)
+
+cap = cv2.VideoCapture(0)
 cap.set(3,640)
 cap.set(4,480)
 
-sift = cv.SIFT_create()
-FLANN_INDEX_KDTREE = 1
+mpHands = mp.solutions.hands
+hands = mpHands.Hands()
+mpDraw = mp.solutions.drawing_utils
 
-while True:
-    succes, img = cap.read()
-    img2 = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+pos = {}
 
-    # find the keypoints and descriptors with SIFT
-    kp1, des1 = sift.detectAndCompute(img1, None)
-    kp2, des2 = sift.detectAndCompute(img2, None)
-    # BFMatcher with default params
-    bf = cv.BFMatcher()
-    matches = bf.knnMatch(des1, des2, k=2)
-    # Apply ratio test
-    good = []
-    for m, n in matches:
-        if m.distance < 0.75 * n.distance:
-            good.append([m])
-    # cv.drawMatchesKnn expects list of lists as matches.
-    img3 = cv.drawMatchesKnn(img1, kp1, img2, kp2, good, None, flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-    plt.imshow(img3), plt.show()
+def draw_hand_connections(img, results):
+    if results.multi_hand_landmarks:
+        for handLms in results.multi_hand_landmarks:
+            for id, lm in enumerate(handLms.landmark):
+                h, w, c = img.shape
+
+                # Finding the coordinates of each landmark
+                cx, cy = int(lm.x * w), int(lm.y * h)
+
+                # Printing each landmark ID and coordinates
+                # on the terminal
+                #print(id, cx, cy)
+
+                pos[id] = [cx, cy]
+
+                # Creating a circle around each landmark
+                cv2.circle(img, (cx, cy), 10, (0, 255, 0),
+                cv2.FILLED)
+                # Drawing the landmark connections
+                mpDraw.draw_landmarks(img, handLms,
+                mpHands.HAND_CONNECTIONS)
+    return img
+
+def getmid(l):
+    y = l[0]
+    z = l[1]
+    print("1", y, z)
+    y = (y / 4 / 500 - 1) / -1 * 800 - 400
+    z = (z / 4 / 500 - 1) / -1 * 940 - 240
+    print("2", y, z)
+    swift.set_position(x = 100,y = 100,z = 100)
+
+def posisjons():
+    if pos != {}:
+        eight = pos.get(8)[1]
+        for x in range(21):
+            if x != 8:
+                if pos.get(x)[1] < eight:
+                    break
+        else:
+            print("is")
+
+def main():
+    while True:
+        succes, img = cap.read()
+        if succes:
+            img = imutils.resize(img, width=500, height=500)
+
+            results = hands.process(img)
+            draw_hand_connections(img, results)
+            posisjons()
+            cv2.imshow("ogmm", img)
+            cv2.waitKey(1)
 
 
-    x = 0
-    y = 0
-    for m in l:
-        x += m[0]
-        y += m[1]
-    x /= 4
-    y /= 4
-    print(x, y)
+if __name__ == "__main__":
+    main()
+

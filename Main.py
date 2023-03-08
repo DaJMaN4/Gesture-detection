@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from time import sleep
 import asyncio
 import techmanpy
-MIN_MATCH_COUNT = 10wwwwwdaaaaaaaaaaaaaaaaaaaaaaadddddddaweeeeeeeeeqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqeeeeeeeee
+MIN_MATCH_COUNT = 10
 img1 = cv.imread('test pictures/box test.png',0)          # queryImage
 # Initiate SIFT detector
 sift = cv.SIFT_create()

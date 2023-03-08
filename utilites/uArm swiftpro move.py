@@ -5,6 +5,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
 from uarm.wrapper import SwiftAPI
 from uarm.utils.log import logger
 import keyboard
+import mediapipe as mp
+import imutils
 
 logger.setLevel(logger.VERBOSE)
 
@@ -18,6 +20,9 @@ print(device_info)
 
 time.sleep(5)
 print(swift.get_polar())
+
+
+swift.set_speed_factor(factor=1)
 
 x = 100
 y = 0
@@ -37,7 +42,7 @@ while True:
     elif keyboard.is_pressed('s'):
         while keyboard.is_pressed('s'):
             pass
-        x +- 20
+        x -= 20
         swift.set_position(x, y, z)
 
     if keyboard.is_pressed('a'):
@@ -58,11 +63,15 @@ while True:
         y += 20
         swift.set_position(x, y, z)
 
+
     elif keyboard.is_pressed('e'):
         while keyboard.is_pressed('e'):
             pass
         y -= 20
-        swift.set_position(x = x,y = y,z = z)
+        swift.set_position(x, y, z)
+
+    print("x = ", x, "y = ", y, "z = ", z)
+
 
 
 
