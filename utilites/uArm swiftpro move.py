@@ -72,7 +72,14 @@ while True:
 
     print("x = ", x, "y = ", y, "z = ", z)
 
-
+#start pos
+#x 180
+#z = 100
+#y = 20
+#zmax = 160
+#ymax = 180
+#zmin = 20
+#ymin = -180
 
 
 

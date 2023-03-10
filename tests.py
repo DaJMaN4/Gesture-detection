@@ -1,9 +1,7 @@
 import numpy as np
 import cv2
-from matplotlib import pyplot as plt
 import os
 import sys
-import time
 from uarm.wrapper import SwiftAPI
 from uarm.utils.log import logger
 import keyboard
@@ -24,10 +22,10 @@ swift.waiting_ready()
 device_info = swift.get_device_info()
 print(device_info)
 
-time.sleep(5)
+sleep(5)
 print(swift.get_polar())
 
-swift.set_speed_factor(factor=1)
+swift.set_speed_factor(factor=10)
 
 cap = cv2.VideoCapture(0)
 cap.set(3,640)
@@ -38,6 +36,13 @@ hands = mpHands.Hands()
 mpDraw = mp.solutions.drawing_utils
 
 pos = {}
+
+#startpositions
+x = 180
+z = 100
+y = 20
+
+n = 0
 
 def draw_hand_connections(img, results):
     if results.multi_hand_landmarks:
@@ -66,12 +71,13 @@ def getmid(l):
     y = l[0]
     z = l[1]
     print("1", y, z)
-    y = (y / 4 / 500 - 1) / -1 * 800 - 400
-    z = (z / 4 / 500 - 1) / -1 * 940 - 240
+    y = (y / 500 - 1) / -1 * 360 - 180
+    z = (z / 500 - 1) / -1 * 140 + 20
     print("2", y, z)
-    swift.set_position(x = 100,y = 100,z = 100)
+    swift.set_position(x, y ,z)
 
 def posisjons():
+    global n, pos
     if pos != {}:
         eight = pos.get(8)[1]
         for x in range(21):
@@ -79,7 +85,10 @@ def posisjons():
                 if pos.get(x)[1] < eight:
                     break
         else:
-            print("is")
+            n += 1
+            print("is", n)
+            getmid(pos.get(8))
+    pos = {}
 
 def main():
     while True:
